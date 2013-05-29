@@ -1,28 +1,25 @@
-
 package com.tumblr.jumblr.request;
 
 import com.sun.net.httpserver.*;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * An HTTP server that returns a static page.
+ * An HTTP server that returns a static page and offers up the requests that have been sent to it.
  * 
  * NOTE: I modified this from http://stackoverflow.com/a/3732328/1772907
  * 
  * @author Jackson
  */
 @SuppressWarnings("restriction")
-public class CallbackServer {
+public class StaticServer {
 
     private final List<URI> requests;
     private final HttpServer server;
-    private final String responsePage;
 
     /**
      * Creates a server to listen on the given port and path.
@@ -32,9 +29,7 @@ public class CallbackServer {
      * @param responsePageLocation (default "callback_response_page.html")
      * @throws IOException 
      */
-    public CallbackServer(int listenPort, String listenPath, String responsePageLocation) throws IOException {
-        this.responsePage = readResource(responsePageLocation);
-        
+    public StaticServer(int listenPort, String listenPath, String responsePage) throws IOException {
         this.server = HttpServer.create(new InetSocketAddress(listenPort), 0);
         server.createContext(listenPath, new RequestHandler(this, responsePage));
         server.setExecutor(null); // creates a default executor
@@ -42,32 +37,17 @@ public class CallbackServer {
         
         this.requests = Collections.synchronizedList(new LinkedList<URI>());
     }
-
-    /**
-     * Creates a server to listen on the given port and path.
-     * 
-     * @param listenPort port to bind to
-     * @param listenPath path to listen to (default "/callback")
-     * @throws IOException 
-     */
-    public CallbackServer(int listenPort, String listenPath) throws IOException {
-        this(listenPort, listenPath, "callback_response_page.html");
-    }
-
-    public CallbackServer(URI url) throws IOException {
-        this(url.getPort(), url.getPath());
-    }
     
-    public CallbackServer(String listenUrl) throws URISyntaxException, IOException {
-        this(new URI(listenUrl));
+    public StaticServer(URI url, String responsePage) throws IOException {
+        this(url.getPort(), url.getPath(), responsePage);
     }
 
     static class RequestHandler implements HttpHandler {
 
-        private final CallbackServer s;
+        private final StaticServer s;
         private String response;
 
-        public RequestHandler(CallbackServer s, String response) {
+        public RequestHandler(StaticServer s, String response) {
             this.s = s;
             this.response = response;
         }
@@ -99,24 +79,5 @@ public class CallbackServer {
     
     public void stop() {
         server.stop(1);
-    }
-    
-    /**
-     * Reads the given resource, even in jar packaging.
-     * @param name the name of the resource
-     * @return the entire text of the resource
-     * @throws IOException
-     */
-    private static String readResource(String name) throws IOException {
-        InputStream is = ClassLoader.getSystemResourceAsStream(name);
-        Reader r = new BufferedReader(new InputStreamReader(is));
-    
-        StringBuffer sb = new StringBuffer();
-        while (r.ready()) {
-            sb.append((char) r.read());
-        }
-        r.close();
-    
-        return sb.toString();
     }
 }

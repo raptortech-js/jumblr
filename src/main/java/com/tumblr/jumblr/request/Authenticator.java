@@ -1,17 +1,20 @@
 package com.tumblr.jumblr.request;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+
 
 public class Authenticator {
     private final OAuthService service;
@@ -48,6 +51,7 @@ public class Authenticator {
     
     public void startServer() throws IOException {
         this.s = new CallbackServer(callbackUrl);
+        
     }
     
     public void openBrowser() {
@@ -105,6 +109,5 @@ public class Authenticator {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-    }
-    
+    }    
 }
